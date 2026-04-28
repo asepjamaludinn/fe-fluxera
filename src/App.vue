@@ -22,8 +22,7 @@ import BottomNav from './components/layout/BottomNav.vue'
 
 const route = useRoute()
 
-// sembunyiind dari login dan regis
 const showBottomNav = computed(() => {
-  return !['login', 'register'].includes(route.name)
+  return !['login', 'register', 'aktivasi'].includes(route.name)
 })
 </script>

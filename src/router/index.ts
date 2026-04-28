@@ -24,6 +24,26 @@ const router = createRouter({
       name: 'profile',
       component: () => import('../views/ProfileView.vue'),
     },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/auth/LoginView.vue'),
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../views/auth/RegisterView.vue'),
+    },
+    {
+      path: '/aktivasi',
+      name: 'aktivasi',
+      component: () => import('../views/AktivasiView.vue'),
+    },
+    {
+      path: '/notifications',
+      name: 'notifikasi',
+      component: () => import('../views/NotificationsView.vue'),
+    },
   ],
 })
 

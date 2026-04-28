@@ -2,7 +2,43 @@
   <div class="flex flex-col min-h-screen pb-6">
     <TopHeader />
 
-    <div class="px-6 -mt-12 relative z-10">
+    <div v-if="!hasDevice" class="px-6 -mt-12 relative z-10">
+      <div
+        class="bg-white rounded-[2rem] p-8 shadow-xl shadow-black/5 border border-outline-variant/50 text-center flex flex-col items-center"
+      >
+        <div
+          class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-5"
+        >
+          <span class="material-symbols-outlined text-[32px] text-on-surface-variant/50"
+            >device_unknown</span
+          >
+        </div>
+        <h2 class="text-on-surface font-headline font-extrabold text-xl mb-2 tracking-tight">
+          Belum Ada Alat Terhubung
+        </h2>
+        <p class="text-[13px] text-on-surface-variant font-label mb-8 leading-relaxed">
+          Anda belum mendaftarkan Reaktor FLUXERA. Segera aktivasi menggunakan Serial Number untuk
+          memulai pemantauan.
+        </p>
+
+        <router-link
+          to="/aktivasi"
+          class="w-full bg-primary hover:bg-primary-dim text-on-primary font-bold py-4 rounded-xl transition-all shadow-md shadow-primary/20 text-[15px] active:scale-[0.98] flex items-center justify-center gap-2"
+        >
+          <span class="material-symbols-outlined text-[20px]">add_link</span>
+          Aktivasi Alat Baru
+        </router-link>
+
+        <button
+          @click="hasDevice = true"
+          class="mt-4 text-[10px] text-on-surface-variant underline"
+        >
+          (Demo: Lewati Aktivasi)
+        </button>
+      </div>
+    </div>
+
+    <div v-else class="px-6 -mt-12 relative z-10 space-y-6">
       <div
         class="bg-surface rounded-3xl p-6 shadow-xl shadow-primary/10 border border-outline-variant"
       >
@@ -92,16 +128,14 @@
           Mulai Batch Baru
         </button>
       </div>
-    </div>
 
-    <div class="px-6 mt-6">
       <div
         class="bg-gradient-to-r from-primary/10 to-transparent border border-primary/20 rounded-2xl p-4 flex gap-3 items-start relative overflow-hidden"
       >
         <div class="absolute -right-4 -top-4 w-16 h-16 bg-primary/20 rounded-full blur-xl"></div>
-        <span class="material-symbols-outlined text-primary text-[22px] relative z-10">
-          auto_awesome
-        </span>
+        <span class="material-symbols-outlined text-primary text-[22px] relative z-10"
+          >auto_awesome</span
+        >
         <div class="relative z-10">
           <h4 class="text-sm font-bold text-on-surface tracking-tight mb-0.5">
             Prediksi AI: Kualitas Grade A
@@ -141,7 +175,10 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import TopHeader from '@/components/layout/TopHeader.vue'
+
+const hasDevice = ref(false)
 
 const quickMenus = [
   { name: 'Live<br />Monitor', icon: 'monitoring', path: '/live-monitor' },
