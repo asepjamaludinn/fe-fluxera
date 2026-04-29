@@ -16,14 +16,15 @@
       <div
         class="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none"
       ></div>
-      <div class="relative z-10 flex justify-between items-center">
+
+      <div class="relative z-10 flex justify-between items-center mb-4">
         <div>
           <h3 class="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-1">
             Total Stok Tersedia
           </h3>
           <div class="flex items-baseline gap-1.5">
             <span class="text-4xl font-extrabold font-headline text-primary">{{ totalStock }}</span>
-            <span class="text-sm font-medium text-white/80">/ 300 Liter</span>
+            <span class="text-sm font-medium text-white/80">/ {{ maxCapacity }} Liter</span>
           </div>
         </div>
         <div
@@ -33,12 +34,26 @@
         </div>
       </div>
 
-      <div class="relative z-10 mt-5">
+      <div class="relative z-10 w-full bg-white/10 rounded-full h-1.5 overflow-hidden mb-4">
         <div
-          class="flex items-center gap-2 text-[11px] text-emerald-400 font-bold bg-emerald-500/10 w-fit px-3 py-1.5 rounded-full border border-emerald-500/20"
+          class="h-full bg-primary rounded-full transition-all duration-1000"
+          :style="`width: ${(totalStock / maxCapacity) * 100}%`"
+        ></div>
+      </div>
+
+      <div class="relative z-10">
+        <div
+          class="flex items-center gap-2 text-[11px] font-bold bg-emerald-500/10 w-fit px-3 py-1.5 rounded-full border"
+          :class="
+            daysRemaining > 2
+              ? 'text-emerald-400 border-emerald-500/20'
+              : 'text-orange-400 border-orange-500/20 bg-orange-500/10'
+          "
         >
-          <span class="material-symbols-outlined text-[16px]">eco</span>
-          Aman untuk 4 hari pakan
+          <span class="material-symbols-outlined text-[16px]">{{
+            daysRemaining > 2 ? 'eco' : 'warning'
+          }}</span>
+          Aman untuk {{ daysRemaining }} hari pakan
         </div>
       </div>
     </div>
@@ -68,12 +83,13 @@
       <div
         v-for="item in sortedItems"
         :key="item.id"
-        class="p-5 bg-white border border-outline-variant/70 rounded-2xl shadow-sm relative overflow-hidden group"
+        @click="openModal(item)"
+        class="p-5 bg-white border border-outline-variant/70 rounded-2xl shadow-sm relative overflow-hidden group cursor-pointer hover:border-primary/50 transition-colors active:scale-[0.98]"
       >
         <div class="flex justify-between items-start mb-3">
           <div class="flex items-center gap-2.5">
             <div
-              class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant"
+              class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:bg-primary/10 group-hover:text-primary transition-colors"
             >
               <span class="material-symbols-outlined text-[18px]">inventory_2</span>
             </div>
@@ -94,7 +110,7 @@
             <span class="material-symbols-outlined text-[12px]" v-if="item.ageDays > 7"
               >warning</span
             >
-            {{ item.ageDays === 0 ? 'Dipanen Hari Ini' : `Usia Fermentasi: ${item.ageDays} Hari` }}
+            {{ item.ageDays === 0 ? 'Dipanen Hari Ini' : `Usia: ${item.ageDays} Hari` }}
           </span>
         </div>
 
@@ -119,6 +135,66 @@
         </div>
       </div>
     </div>
+
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-6">
+      <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" @click="closeModal"></div>
+
+      <div
+        class="bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 shadow-2xl animate-fade-in-up"
+      >
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="font-headline font-bold text-lg text-on-surface">Catat Pengeluaran</h3>
+          <button
+            @click="closeModal"
+            class="w-8 h-8 flex items-center justify-center bg-surface-container rounded-full text-on-surface-variant"
+          >
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+
+        <div class="space-y-5">
+          <div
+            class="bg-primary-container/50 border border-primary/20 rounded-xl p-3 flex justify-between items-center"
+          >
+            <span class="text-xs font-bold text-on-primary-container">Jerigen Terpilih:</span>
+            <span class="text-sm font-extrabold text-primary font-headline"
+              >Batch #{{ selectedItem?.id }}</span
+            >
+          </div>
+
+          <div>
+            <label
+              class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2 block"
+            >
+              Jumlah yang Diambil
+            </label>
+            <div class="relative flex items-center">
+              <input
+                type="number"
+                v-model.number="takeAmount"
+                class="w-full p-4 border border-outline-variant rounded-xl font-bold text-lg text-on-surface focus:border-primary focus:ring-[3px] focus:ring-primary/15 outline-none transition-all"
+                placeholder="0"
+                :max="selectedItem?.current"
+                min="0"
+              />
+              <span class="absolute right-4 font-bold text-on-surface-variant">Liter</span>
+            </div>
+            <p class="text-[10px] text-on-surface-variant mt-2 font-medium">
+              Sisa tersedia di jerigen ini:
+              <span class="font-bold text-on-surface">{{ selectedItem?.current }} Liter</span>
+            </p>
+          </div>
+
+          <button
+            @click="submitPengeluaran"
+            :disabled="!takeAmount || takeAmount <= 0 || takeAmount > selectedItem?.current"
+            class="w-full bg-primary hover:bg-primary-dim disabled:bg-surface-container disabled:text-on-surface-variant disabled:shadow-none text-white font-bold py-3.5 rounded-xl transition-all shadow-md active:scale-95 mt-2"
+          >
+            Simpan Data
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -126,26 +202,26 @@
 import { ref, computed } from 'vue'
 
 const isFifo = ref(true)
+const maxCapacity = 300
+const dailyConsumption = 25
 
-// dummy
-const storageItems = [
+const storageItems = ref([
   { id: '021', date: '26 Apr 2026', current: 50, max: 50, ageDays: 0 },
   { id: '020', date: '24 Apr 2026', current: 45, max: 50, ageDays: 2 },
   { id: '019', date: '17 Apr 2026', current: 10, max: 50, ageDays: 9 },
-]
+])
 
 const totalStock = computed(() => {
-  return storageItems.reduce((acc, item) => acc + item.current, 0)
+  return storageItems.value.reduce((acc, item) => acc + item.current, 0)
 })
 
-// sorting
+const daysRemaining = computed(() => {
+  return Math.floor(totalStock.value / dailyConsumption)
+})
+
 const sortedItems = computed(() => {
-  return [...storageItems].sort((a, b) => {
-    if (isFifo.value) {
-      return b.ageDays - a.ageDays
-    } else {
-      return a.ageDays - b.ageDays
-    }
+  return [...storageItems.value].sort((a, b) => {
+    return isFifo.value ? b.ageDays - a.ageDays : a.ageDays - b.ageDays
   })
 })
 
@@ -154,4 +230,46 @@ const getAgeColor = (days) => {
   if (days > 3) return 'bg-orange-50 text-orange-600 border border-orange-100'
   return 'bg-emerald-50 text-emerald-600 border border-emerald-100'
 }
+
+const showModal = ref(false)
+const selectedItem = ref(null)
+const takeAmount = ref(null)
+
+const openModal = (item) => {
+  selectedItem.value = item
+  takeAmount.value = null
+  showModal.value = true
+}
+
+const closeModal = () => {
+  showModal.value = false
+  selectedItem.value = null
+}
+
+const submitPengeluaran = () => {
+  if (takeAmount.value && selectedItem.value) {
+    const index = storageItems.value.findIndex((i) => i.id === selectedItem.value.id)
+    if (index !== -1) {
+      storageItems.value[index].current -= takeAmount.value
+    }
+    closeModal()
+  }
+}
 </script>
+
+<style scoped>
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+</style>

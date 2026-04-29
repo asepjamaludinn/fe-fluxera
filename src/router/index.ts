@@ -44,6 +44,16 @@ const router = createRouter({
       name: 'notifikasi',
       component: () => import('../views/NotificationsView.vue'),
     },
+    {
+      path: '/live-monitor',
+      name: 'liveMonitor',
+      component: () => import('../views/LiveMonitorView.vue'),
+    },
+    {
+      path: '/rapor-hemat',
+      name: 'raporHemat',
+      component: () => import('../views/RaporHematView.vue'),
+    },
   ],
 })
 

@@ -23,6 +23,6 @@ import BottomNav from './components/layout/BottomNav.vue'
 const route = useRoute()
 
 const showBottomNav = computed(() => {
-  return !['login', 'register', 'aktivasi'].includes(route.name)
+  return !['login', 'register', 'aktivasi', 'liveMonitor', 'raporHemat'].includes(route.name)
 })
 </script>
